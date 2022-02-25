@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Paint</string>
+    <string name="start">Start</string>
+    <string name="front_image">Front Image</string>
+    <string name="paint_uppercase">PAINT</string>
+    <string name="about">About</string>
+    <string name="settings">Settings</string>
+    <string name="map">Map</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_main2">MainActivity2</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="pick_a_color">Pick a color</string>
+    <string name="catarina_moita">Catarina Moita</string>
+    <string name="martim_mour_o">Martim Mourão</string>
+    <string name="ricardo_santos">Ricardo Santos</string>
+    <string name="tom_s_dias">Tomás Dias</string>
+    <string name="grupo_composto_por">Grupo composto por:</string>
+</resources>
