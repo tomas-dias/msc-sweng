@@ -1,2 +1,2 @@
-.idea/
-backup/
+.idea
+__pycache__

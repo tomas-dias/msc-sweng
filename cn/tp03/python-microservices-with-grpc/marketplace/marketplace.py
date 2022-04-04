@@ -8,7 +8,7 @@ from recommendations_pb2_grpc import RecommendationsStub
 
 app = Flask(__name__)
 
-recommendations_host = os.getenv("RECOMMENDATIONS_HOST", "localhost")
+# recommendations_host = os.getenv("RECOMMENDATIONS_HOST", "localhost")
 # with open("client.key", "rb") as fp:
 #     client_key = fp.read()
 # with open("client.pem", "rb") as fp:
