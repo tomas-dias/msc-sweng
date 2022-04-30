@@ -3,8 +3,8 @@ package sut.lb;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -13,15 +13,17 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-public class TSTResolver implements ParameterResolver {
-
+public class TSTKeysResolver implements ParameterResolver {
+	
+	private String[] keys;
+	
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
 		
 		Parameter parameter = parameterContext.getParameter();
 		return Objects.equals(parameter.getParameterizedType().getTypeName(), 
-				              "java.util.Map<java.lang.String, java.lang.Integer>");
+				              "java.lang.String[]");
 		
 	}
 
@@ -29,27 +31,26 @@ public class TSTResolver implements ParameterResolver {
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
 		
-		Scanner sc;
-		
-		Map<String, Integer> map = new HashMap<>();
-		
 		try {
 			
-			sc = new Scanner(new File("data/someWords.txt"));
+			Scanner sc = new Scanner(new File("data/someWords.txt"));
+			List<String> keysList = new ArrayList<>();
 			
-			int i=0;
 			while(sc.hasNextLine()) {
-				String[] keys = sc.nextLine().split(" ");
-				for(String key : keys)
-					map.put(key, ++i);
+				String[] tmp = sc.nextLine().split(" ");
+				for(int i = 0; i < tmp.length; i++)
+					keysList.add(tmp[i]);
 			}
+			
+			keys = keysList.toArray(new String[keysList.size()]);
+			
+			sc.close();
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return map;
+		return keys;
 	}
-
 }
