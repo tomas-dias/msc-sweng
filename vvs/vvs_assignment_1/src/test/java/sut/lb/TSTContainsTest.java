@@ -6,11 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import sut.TST;
+import sut.util.TSTKeysResolver;
 
 @DisplayName("<= Testing Contains Method =>")
 @ExtendWith(TSTKeysResolver.class)
@@ -26,6 +28,7 @@ public class TSTContainsTest {
 	
 	// Tests when the given key is null.
 	@Test
+	//@Disabled
 	@DisplayName("throws IllegalArgumentException when the given key is null")
 	public void nullKeyTest() {
 		String key = null;
@@ -34,6 +37,7 @@ public class TSTContainsTest {
 	
 	// Tests when the symbol table doesn´t contain the given key.
 	@Test
+	//@Disabled
 	@DisplayName("is false when the table doesn't contain the given key")
 	public void tableDoesNotContainKeyTest(String[] keys) { // Parameter injected by TSTKeysResolver.
 		String key = keys[0];
@@ -42,6 +46,7 @@ public class TSTContainsTest {
 	
 	// Tests when the symbol table contains the given key.
 	@Test
+	//@Disabled
 	@DisplayName("is true when the table contains the given key")
 	public void tableContainsKeyTest(String[] keys) {
 		String key = keys[0];

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import sut.TST;
+import sut.util.TSTKeysResolver;
 
 @DisplayName("<= Testing Put Method =>")
 @ExtendWith(TSTKeysResolver.class)
@@ -60,19 +61,20 @@ public class TSTPutTest
 		assumeFalse(tst.size() == 0);
 
 		tst.put(key, 1);
-		assertEquals(1, (int) tst.get(key));
+		assertEquals(1, (int) tst.get(key), () -> "should be 1");
 	}
 	
+	// Tests if multiple keys are inserted in the symbol table.
+	// Note: The size tested is 7 because this is the number of different keys contained in the injected array parameter.
 	@Test
+	@DisplayName("is 7 when all different keys are inserted in the symbol table")
 	public void multipleKeyInsertionsTest(String[] keys) {
 		assumeTrue(tst.size() == 0);
 		assumeFalse(tst.size() != 0);	
 		
-		for(int i = 0; i < keys.length; i++) {
+		for(int i = 0; i < keys.length; i++)
 			tst.put(keys[i], i);
-			System.out.println(keys[i]);
-		}
-		assertEquals(8, (int) tst.size());
+		assertEquals(7, (int) tst.size(), () -> "should be 7");
 	}
 	
 	// Teardown after testing.
