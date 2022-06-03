@@ -1,4 +1,4 @@
-package vvs_webapp;
+package webapp;
 
 import static java.util.Arrays.asList;
 
@@ -26,8 +26,6 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
 public class WebAppNarrativesTest {
 
 	private static final String APPLICATION_URL = "http://localhost:8080/VVS_assignment_2/";
-	private static final int APPLICATION_NUMBER_USE_CASES = 11;
-
 	private static HtmlPage page;
 	
 	@BeforeAll
@@ -48,44 +46,63 @@ public class WebAppNarrativesTest {
 		}
 	}
 	
-
-	@Disabled
+	/**
+	 * 2.a)
+	 * 
+	 * Testing:
+	 * 
+	 * Insert a new address for an existing customer, 
+	 * then the table of addresses of that client includes those addresses and its total row size increases by one.
+	 * 
+	 * @throws IOException
+	 */
+	
+	//@Disabled
 	@Test
 	public void insertCustomerAddressTest() throws IOException {
 		final String NPC = "197672337";
+		
+		// Customer address data
 		final String ADDRESS = "CAMPO GRANDE";
 		final String DOOR = "016";
 		final String POSTAL_CODE = "1749-016";
 		final String LOCALITY = "LISBOA";
 		
-		HtmlPage reportPage;
+		HtmlPage nextPage;
 		HtmlTable table;
 		WebRequest req;
-		String textReportPage;
+		String textNextPage;
 		String xpath;
-		int oldTableSize = 0;
+		int tableSize;
 		int newTableSize;
 		
+		// Check that customer exists
+		HtmlAnchor getCustomersLink = page.getAnchorByHref("GetAllCustomersPageController");
+		nextPage = (HtmlPage) getCustomersLink.openLinkInNewWindow();
+		assertTrue(nextPage.asText().contains(NPC));
+		
+		// Check customer related data 
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"GetCustomerPageController"), HttpMethod.GET);
 		req.setRequestParameters(asList(new NameValuePair("vat", NPC)));
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
-		//System.out.println(textReportPage);  // check if is the report page	
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage); // check if is the next page
+		
+		// Xpath for table
 		xpath = "/html/body//table";
 		
-		if(reportPage.getByXPath(xpath).size() != 0) {
-			table = (HtmlTable) reportPage.getByXPath(xpath).get(0);
-			oldTableSize = table.getRowCount() - 1;
+		// Get customer addresses table size 
+		tableSize = 0;
+		if(nextPage.getByXPath(xpath).size() != 0) {
+			table = (HtmlTable) nextPage.getByXPath(xpath).get(0);
+			tableSize = table.getRowCount() - 1; // without header
 		}
 		
-		System.out.println(oldTableSize);
-		//assertEquals(0, tableSize);
-		
-		
+		// Place customer address data at form
 		String formData = String.format("vat=%s&address=%s&door=%s&postalCode=%s&locality=%s", 
 				NPC, ADDRESS, DOOR, POSTAL_CODE, LOCALITY);
 		
@@ -93,74 +110,80 @@ public class WebAppNarrativesTest {
 		req.setRequestBody(formData);
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage); // check if is the next page
 		
-		//System.out.println(textReportPage);  // check if is the report page
+		assertTrue(textNextPage.contains(ADDRESS));
+		assertTrue(textNextPage.contains(DOOR));
+		assertTrue(textNextPage.contains(POSTAL_CODE));
+		assertTrue(textNextPage.contains(LOCALITY));
 		
-		assertTrue(textReportPage.contains(ADDRESS));
-		assertTrue(textReportPage.contains(DOOR));
-		assertTrue(textReportPage.contains(POSTAL_CODE));
-		assertTrue(textReportPage.contains(LOCALITY));
-		
-		table = (HtmlTable) reportPage.getByXPath(xpath).get(0);
-		System.out.println(table.getRowCount() - 1);
-		
+		// Get new customer addresses table size
+		table = (HtmlTable) nextPage.getByXPath(xpath).get(0);
 		newTableSize = table.getRowCount() - 1;
-		assertEquals(oldTableSize + 1, newTableSize);
 		
-		System.out.println("---------------------------------");
-		for (final HtmlTableRow row : table.getRows()) {
-		    System.out.println("Found row");
-		    for (final HtmlTableCell cell : row.getCells()) {
-		       System.out.println("   Found cell: " + cell.asText());
-		    }
-		}
-		System.out.println("---------------------------------");
+		assertEquals(tableSize + 1, newTableSize);
 	}
 	
-	@Disabled
+	/**
+	 * 2.b)
+	 * 
+	 * Testing:
+	 * 
+	 * A new sale will be listed as an open sale for the respective customer.
+	 * 
+	 * @throws IOException
+	 */
+	
+	//@Disabled
 	@Test
 	public void newSaleListedAsOpenTest() throws IOException {
 		final String NPC = "197672337";
 		
-		HtmlPage reportPage;
+		HtmlPage nextPage;
 		HtmlAnchor link;
 		HtmlForm form;
 		HtmlTable table;
 		HtmlTableRow row;
 		HtmlInput input;
 		WebRequest req;
-		String textReportPage;
+		String textNextPage;
 		String xpath;
 		String status;
 		
-		link = page.getAnchorByHref("addSale.html");
-		reportPage = (HtmlPage) link.openLinkInNewWindow();
+		// Check that customer exists
+		HtmlAnchor getCustomersLink = page.getAnchorByHref("GetAllCustomersPageController");
+		nextPage = (HtmlPage) getCustomersLink.openLinkInNewWindow();
+		assertTrue(nextPage.asText().contains(NPC));
 		
-		form = reportPage.getForms().get(0);
+		// Get add sale page link
+		link = page.getAnchorByHref("addSale.html");
+		// Click on it
+		nextPage = (HtmlPage) link.openLinkInNewWindow();
+		
+		// Place data at form
+		form = nextPage.getForms().get(0);
 		input = form.getInputByName("customerVat");
 		input.setValueAttribute(NPC);
 		input = form.getInputByValue("Add Sale");
 		input.click();
 		
-		
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"GetSalePageController"), HttpMethod.GET);
 		req.setRequestParameters(asList(new NameValuePair("customerVat", NPC)));
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
-		System.out.println(textReportPage);  // check if is the report page
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the next page
 		
+		// Check new sale status
 		xpath = "/html/body//table";
-		table = (HtmlTable) reportPage.getByXPath(xpath).get(0);
-		System.out.println(table.getRowCount() - 1);
-		
+		table = (HtmlTable) nextPage.getByXPath(xpath).get(0);
 		row = table.getRow(table.getRowCount() - 1);
 		status = row.getCell(3).asText();
 		
@@ -168,67 +191,94 @@ public class WebAppNarrativesTest {
 		
 	}
 	
-	@Disabled
+	/**
+	 * 2.c)
+	 * 
+	 * Testing:
+	 * 
+	 * After closing a sale, it will be listed as closed.
+	 * 
+	 * @throws IOException
+	 */
+	
+	//@Disabled
 	@Test
 	public void saleListedAsClosedTest() throws IOException {
 		final String NPC = "197672337";
 		
-		HtmlPage reportPage;
-		HtmlAnchor link;
-		HtmlForm form;
+		HtmlPage nextPage;
 		HtmlTable table;
 		HtmlTableRow row;
-		HtmlInput input;
 		WebRequest req;
-		String textReportPage;
+		String textNextPage;
 		String formData;
 		String xpath;
 		String id;
 		String status;
 		
+		// Check that customer exists
+		HtmlAnchor getCustomersLink = page.getAnchorByHref("GetAllCustomersPageController");
+		nextPage = (HtmlPage) getCustomersLink.openLinkInNewWindow();
+		assertTrue(nextPage.asText().contains(NPC));
+		
+		// Place data at form
 		formData = String.format("customerVat=%s", NPC);
 		
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"AddSalePageController"), HttpMethod.POST);
 		req.setRequestBody(formData);
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
-		System.out.println(textReportPage);  // check if is the report page
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the report page
 		
+		// Get new sale id
 		xpath = "/html/body//table";
-		table = (HtmlTable) reportPage.getByXPath(xpath).get(0);
-		System.out.println(table.getRowCount() - 1);
-		
+		table = (HtmlTable) nextPage.getByXPath(xpath).get(0);
 		row = table.getRow(table.getRowCount() - 1);
 		id = row.getCell(0).asText();
 		
+		// Update new sale status to 'CLOSED'
 		formData = String.format("id=%s", id);
 		
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"UpdateSaleStatusPageControler"), HttpMethod.POST);
 		req.setRequestBody(formData);
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
-		System.out.println(textReportPage);  // check if is the report page
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the report page
 		
-		table = (HtmlTable) reportPage.getByXPath(xpath).get(0);
-		System.out.println(table.getRowCount() - 1);
-		
+		// Check new sale updated status
+		table = (HtmlTable) nextPage.getByXPath(xpath).get(0);
 		row = table.getRow(table.getRowCount() - 1);
 		status = row.getCell(3).asText();
 		
 		assertEquals("C", status);
 	}
 	
+	/**
+	 * 2.d)
+	 * 
+	 * Testing:
+	 * 
+	 * Create a new customer, create a new sale for her, 
+	 * insert a delivery for that sale and then show the sale delivery. 
+	 * Check that all intermediate pages have the expected information.
+	 * 
+	 * @throws IOException
+	 */
+	
+	//@Disabled
 	@Test
 	public void insertSaleDeliveryTest() throws IOException {
 		final String NPC = "503183504";
+		
+		// Customer address data
         final String DESIGNATION = "FCUL";
         final String PHONE = "217500000";
 		final String ADDRESS = "CAMPO GRANDE";
@@ -236,32 +286,43 @@ public class WebAppNarrativesTest {
 		final String POSTAL_CODE = "1749-016";
 		final String LOCALITY = "LISBOA";
 		
-		HtmlPage reportPage;
-		HtmlAnchor link;
-		HtmlForm form;
+		// Sale data
+		final String DATE = java.time.LocalDate.now().toString();
+		final String TOTAL = "0.0";
+		final String STATUS = "O";
+		
+		HtmlPage nextPage;
 		HtmlTable table;
 		HtmlTableRow row;
-		HtmlInput input;
 		WebRequest req;
-		String textReportPage;
+		String textNextPage;
 		String formData;
 		String xpath;
-		String addr_id, sale_id;
-		String status;
+		String addr_id;
+		String sale_id;
 		
+		HtmlInput vatInput;
+		HtmlInput submit;
+		HtmlAnchor link;
+		HtmlForm form;
+		
+		// Place data at form
 		formData = String.format("vat=%s&designation=%s&phone=%s", NPC, DESIGNATION, PHONE);
 		
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"AddCustomerPageController"), HttpMethod.POST);
 		req.setRequestBody(formData);
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the report page
 		
-		System.out.println(textReportPage);  // check if is the report page
+		assertTrue(textNextPage.contains(DESIGNATION));
+		assertTrue(textNextPage.contains(PHONE));
 		
+		// Place data at form
 		formData = String.format("vat=%s&address=%s&door=%s&postalCode=%s&locality=%s", 
 				NPC, ADDRESS, DOOR, POSTAL_CODE, LOCALITY);
 		
@@ -269,61 +330,97 @@ public class WebAppNarrativesTest {
 		req.setRequestBody(formData);
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the report page
 		
-		System.out.println(textReportPage);  // check if is the report page
+		assertTrue(textNextPage.contains(ADDRESS));
+		assertTrue(textNextPage.contains(DOOR));
+		assertTrue(textNextPage.contains(POSTAL_CODE));
+		assertTrue(textNextPage.contains(LOCALITY));
 		
-		
+		// Place data at form
 		formData = String.format("customerVat=%s", NPC);
 		
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"AddSalePageController"), HttpMethod.POST);
 		req.setRequestBody(formData);
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
-		System.out.println(textReportPage);  // check if is the report page
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the report page
 		
+		assertTrue(textNextPage.contains(DATE));
+		assertTrue(textNextPage.contains(TOTAL));
+		assertTrue(textNextPage.contains(STATUS));
+		assertTrue(textNextPage.contains(NPC));
 		
+		// Place data at form
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"AddSaleDeliveryPageController"), HttpMethod.GET);
 		req.setRequestParameters(asList(new NameValuePair("vat", NPC)));
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
-		System.out.println(textReportPage);  // check if is the report page
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the report page
 		
+		assertTrue(textNextPage.contains(ADDRESS));
+		assertTrue(textNextPage.contains(DOOR));
+		assertTrue(textNextPage.contains(POSTAL_CODE));
+		assertTrue(textNextPage.contains(LOCALITY));
+		assertTrue(textNextPage.contains(DATE));
+		assertTrue(textNextPage.contains(TOTAL));
+		assertTrue(textNextPage.contains(STATUS));
+		assertTrue(textNextPage.contains(NPC));
+		
+		// Get last address id
 		xpath = "/html/body//table";
-		table = (HtmlTable) reportPage.getByXPath(xpath).get(0);
-		
+		table = (HtmlTable) nextPage.getByXPath(xpath).get(0);
 		row = table.getRow(table.getRowCount() - 1);
 		addr_id = row.getCell(0).asText();
 		
-		table = (HtmlTable) reportPage.getByXPath(xpath).get(1);
-		
+		// Get last sale id
+		table = (HtmlTable) nextPage.getByXPath(xpath).get(1);
 		row = table.getRow(table.getRowCount() - 1);
 		sale_id = row.getCell(0).asText();
 		
+		// Place data at form
 		formData = String.format("addr_id=%s&sale_id=%s", addr_id, sale_id);
-		
 		
 		req = new WebRequest(new java.net.URL(APPLICATION_URL+"AddSaleDeliveryPageController"), HttpMethod.POST);
 		req.setRequestBody(formData);
 		
 		try (final WebClient webClient = new WebClient(BrowserVersion.getDefault())) { 
-			reportPage = (HtmlPage) webClient.getPage(req);
+			nextPage = (HtmlPage) webClient.getPage(req);
 		}
 		
-		textReportPage = reportPage.asText();
-		System.out.println(textReportPage);  // check if is the report page
+		textNextPage = nextPage.asText();
+		System.out.println(textNextPage);  // check if is the report page
 		
+		assertTrue(textNextPage.contains(sale_id));
+		assertTrue(textNextPage.contains(addr_id));
+		
+		// at index, goto Remove case use and remove the previous client
+		link = page.getAnchorByHref("RemoveCustomerPageController");
+		nextPage = (HtmlPage) link.openLinkInNewWindow();
+		assertTrue(nextPage.asText().contains(NPC));
+		
+		form = nextPage.getForms().get(0);
+		vatInput = form.getInputByName("vat");
+		vatInput.setValueAttribute(NPC);
+		submit = form.getInputByName("submit");
+		submit.click();
+		
+		// now check that the new client was erased
+		link = page.getAnchorByHref("GetAllCustomersPageController");
+		nextPage = (HtmlPage) link.openLinkInNewWindow();
+		assertFalse(nextPage.asText().contains(NPC));
 	}
 	
 }

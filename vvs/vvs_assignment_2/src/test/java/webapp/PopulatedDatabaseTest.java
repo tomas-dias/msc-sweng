@@ -1,17 +1,16 @@
-package vvs_dbsetup;
+package webapp;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static vvs_dbsetup.DBSetupUtils.DB_PASSWORD;
-import static vvs_dbsetup.DBSetupUtils.DB_URL;
-import static vvs_dbsetup.DBSetupUtils.DB_USERNAME;
-import static vvs_dbsetup.DBSetupUtils.DELETE_ALL;
-import static vvs_dbsetup.DBSetupUtils.INSERT_CUSTOMER_ADDRESS_DATA;
-import static vvs_dbsetup.DBSetupUtils.INSERT_CUSTOMER_SALE_DATA;
-import static vvs_dbsetup.DBSetupUtils.INSERT_CUSTOMER_ALL_DATA;
-import static vvs_dbsetup.DBSetupUtils.startApplicationDatabaseForTesting;
+import static webapp.utils.DBSetupUtils.DB_PASSWORD;
+import static webapp.utils.DBSetupUtils.DB_URL;
+import static webapp.utils.DBSetupUtils.DB_USERNAME;
+import static webapp.utils.DBSetupUtils.DELETE_ALL;
+import static webapp.utils.DBSetupUtils.INSERT_CUSTOMER_ALL_DATA;
+import static webapp.utils.DBSetupUtils.startApplicationDatabaseForTesting;
 
 import java.sql.SQLException;
 
@@ -37,7 +36,7 @@ import webapp.services.SaleService;
 import webapp.services.SalesDTO;
 import webapp.services.SalesDeliveryDTO;
 
-public class DBBasedTest {
+public class PopulatedDatabaseTest {
 
 	private static Destination dataSource;
 	
@@ -75,6 +74,16 @@ public class DBBasedTest {
 		return false;
 	}
 	
+	/**
+	 * 3.a)
+	 * 
+	 * Testing:
+	 * 
+	 * The SUT does not allow to add a new client with an existing VAT.
+	 * 
+	 * @throws ApplicationException
+	 */
+	
 	@Disabled
 	@Test
 	public void addNewClientWithAnExistingVATTest() throws ApplicationException {
@@ -83,6 +92,16 @@ public class DBBasedTest {
 			CustomerService.INSTANCE.addCustomer(197672337, "FCUL", 217500000);
 		});
 	}
+	
+	/**
+	 * 3.b)
+	 * 
+	 * Testing:
+	 * 
+	 * After the update of a costumer contact, that information should be properly saved.
+	 * 
+	 * @throws ApplicationException
+	 */
 	
 	@Disabled
 	@Test
@@ -93,6 +112,16 @@ public class DBBasedTest {
 		CustomerDTO customerDTO = CustomerService.INSTANCE.getCustomerByVat(197672337);
 		assertEquals(999999999, customerDTO.phoneNumber);
 	}
+	
+	/**
+	 * 3.c)
+	 * 
+	 * Testing:
+	 * 
+	 * After deleting all costumers, the list of all customers should be empty.
+	 * 
+	 * @throws ApplicationException
+	 */
 	
 	@Disabled
 	@Test
@@ -106,6 +135,16 @@ public class DBBasedTest {
 		assertEquals(0, CustomerService.INSTANCE.getAllCustomers().customers.size());
 	}
 	
+	/**
+	 * 3.d)
+	 * 
+	 * Testing:
+	 * 
+	 * Adding a new sale increases the total number of all sales by one.
+	 * 
+	 * @throws ApplicationException
+	 */
+	
 	@Disabled
 	@Test
 	public void addNewSaleTest() throws ApplicationException {
@@ -116,6 +155,16 @@ public class DBBasedTest {
 		SaleService.INSTANCE.addSale(197672337);
 		
 		assertEquals(salesSize + 1, SaleService.INSTANCE.getAllSales().sales.size());
+	}
+	
+	@Test
+	public void addNewSaleWithInvalidVATTest() throws ApplicationException {
+		SalesDTO salesDTO = SaleService.INSTANCE.getAllSales();
+		int salesSize = salesDTO.sales.size();
+		
+		SaleService.INSTANCE.addSale(1);
+		
+		assertFalse(salesSize + 1 == SaleService.INSTANCE.getAllSales().sales.size()); 
 	}
 	
 	@Disabled
@@ -133,8 +182,9 @@ public class DBBasedTest {
 		assertEquals("C", saleDTO.statusId);
 	}
 	
+	@Disabled
 	@Test
-	public void addSaleDeliveryTest() throws ApplicationException {
+	public void addNewSaleDeliveryTest() throws ApplicationException {
 		assertTrue(hasClient(197672337));
 		SalesDTO salesDTO = SaleService.INSTANCE.getSaleByCustomerVat(197672337);
 		assumeTrue(salesDTO.sales.size() != 0);

@@ -1,4 +1,4 @@
-package vvs_dbsetup;
+package webapp.utils;
 
 import static com.ninja_squad.dbsetup.Operations.*;
 import com.ninja_squad.dbsetup.generator.ValueGenerators;
