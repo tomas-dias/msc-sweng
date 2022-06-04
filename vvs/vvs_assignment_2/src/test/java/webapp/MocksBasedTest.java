@@ -9,7 +9,6 @@ import org.mockito.MockitoAnnotations;
 
 import webapp.persistence.AddressRowDataGateway;
 import webapp.persistence.PersistenceException;
-import webapp.refactoring.NewAddressRowDataGateway;
 import webapp.refactoring.NewCustomerService;
 import webapp.services.ApplicationException;
 
