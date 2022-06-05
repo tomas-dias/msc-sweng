@@ -24,31 +24,36 @@ import webapp.services.CustomersDTO;
  */
 public class NewCustomerService {
 	
+	private CustomerRowDataGateway customer;
+	private CustomerFinder finder;
 	private AddressRowDataGateway address;
 	
-	public NewCustomerService(AddressRowDataGateway address) {
+	public NewCustomerService(
+			CustomerRowDataGateway customer,
+			CustomerFinder finder,
+			AddressRowDataGateway address) {
+		this.customer = customer;
+		this.finder = finder;
 		this.address = address;
 	}
 	
-	public CustomerDTO getCustomerByVat (int vat) throws ApplicationException {
+	public CustomerDTO getCustomerByVat (int vat) throws ApplicationException, PersistenceException {
 		if (!isValidVAT (vat))
 			throw new ApplicationException ("Invalid VAT number: " + vat);
-		else try {
-			CustomerRowDataGateway customer = new CustomerFinder().getCustomerByVATNumber(vat);
-			return new CustomerDTO(customer.getCustomerId(), customer.getVAT(), 
-					customer.getDesignation(), customer.getPhoneNumber());
-		} catch (PersistenceException e) {
-				throw new ApplicationException ("Customer with vat number " + vat + " not found.", e);
+		else {
+			return new CustomerDTO(
+					finder.getCustomerByVATNumber(vat).getCustomerId(), 
+					finder.getCustomerByVATNumber(vat).getVAT(), 
+					finder.getCustomerByVATNumber(vat).getDesignation(),
+					finder.getCustomerByVATNumber(vat).getPhoneNumber());
 		}
 	}
 	
-	public void addCustomer(int vat, String designation, int phoneNumber) throws ApplicationException {
+	public void addCustomer(int vat) throws ApplicationException {
 		if (!isValidVAT (vat))
 			throw new ApplicationException ("Invalid VAT number: " + vat);
 		else try {
-			CustomerRowDataGateway customer = new CustomerRowDataGateway(vat, designation, phoneNumber);
 			customer.insert();
-			
 		} catch (PersistenceException e) {
 				throw new ApplicationException ("Can't add customer with vat number " + vat + ".", e);
 		}
@@ -56,7 +61,7 @@ public class NewCustomerService {
 	
 	public CustomersDTO getAllCustomers() throws ApplicationException {
 		try {
-			List<CustomerRowDataGateway> customers = new CustomerRowDataGateway().getAllCustomers();
+			List<CustomerRowDataGateway> customers = customer.getAllCustomers();
 			List<CustomerDTO> list = new ArrayList<CustomerDTO>();
 			for(CustomerRowDataGateway cust : customers) {
 				list.add(new CustomerDTO(cust.getCustomerId(), cust.getVAT(), 
@@ -69,21 +74,20 @@ public class NewCustomerService {
 		}
 	}
 	
-	public void addAddressToCustomer(int customerVat, String addr) throws ApplicationException {
+	public void addAddressToCustomer(int customerVat) throws ApplicationException {
 		if (!isValidVAT (customerVat))
 			throw new ApplicationException ("Invalid VAT number: " + customerVat);
 		else try {
-			// AddressRowDataGateway address = new AddressRowDataGateway(addr, customerVat);
 			address.insert();
 			
 		} catch (PersistenceException e) {
-				throw new ApplicationException ("Can't add the address /n" + addr + "/nTo customer with vat number " + customerVat + ".", e);
+				throw new ApplicationException ("Can't add the address /n" + address.getAddress() + "/nTo customer with vat number " + customerVat + ".", e);
 		}
 	}
 	
 	public AddressesDTO getAllAddresses(int customerVat) throws ApplicationException {
 		try {
-			List<AddressRowDataGateway> addrs = new AddressRowDataGateway().getCustomerAddresses(customerVat);
+			List<AddressRowDataGateway> addrs = address.getCustomerAddresses(customerVat);
 			List<AddressDTO> list = new ArrayList<>();
 			for(AddressRowDataGateway addr : addrs) {
 				list.add(new AddressDTO(addr.getId(), addr.getCustVat(), addr.getAddress()));
@@ -101,9 +105,8 @@ public class NewCustomerService {
 		if (!isValidVAT (vat))
 			throw new ApplicationException ("Invalid VAT number: " + vat);
 		else try {
-			CustomerRowDataGateway customer = new CustomerFinder().getCustomerByVATNumber(vat);
-			customer.setPhoneNumber(phoneNumber);
-			customer.updatePhoneNumber();
+			finder.getCustomerByVATNumber(vat).setPhoneNumber(phoneNumber);;
+			finder.getCustomerByVATNumber(vat).updatePhoneNumber();
 		} catch (PersistenceException e) {
 				throw new ApplicationException ("Customer with vat number " + vat + " not found.", e);
 		}
@@ -113,8 +116,7 @@ public class NewCustomerService {
 		if (!isValidVAT (vat))
 			throw new ApplicationException ("Invalid VAT number: " + vat);
 		else try {
-			CustomerRowDataGateway customer = new CustomerFinder().getCustomerByVATNumber(vat);
-			customer.removeCustomer();
+			finder.getCustomerByVATNumber(vat).removeCustomer();
 		} catch (PersistenceException e) {
 				throw new ApplicationException ("Customer with vat number " + vat + " doesn't exist.", e);
 		}

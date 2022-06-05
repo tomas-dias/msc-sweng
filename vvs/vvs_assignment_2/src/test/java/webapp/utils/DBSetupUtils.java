@@ -1,11 +1,13 @@
 package webapp.utils;
 
-import static com.ninja_squad.dbsetup.Operations.*;
-import com.ninja_squad.dbsetup.generator.ValueGenerators;
-import com.ninja_squad.dbsetup.operation.Insert;
-import com.ninja_squad.dbsetup.operation.Operation;
+import static com.ninja_squad.dbsetup.Operations.deleteAllFrom;
+import static com.ninja_squad.dbsetup.Operations.insertInto;
+import static com.ninja_squad.dbsetup.Operations.sequenceOf;
 
 import java.util.GregorianCalendar;
+
+import com.ninja_squad.dbsetup.operation.Insert;
+import com.ninja_squad.dbsetup.operation.Operation;
 
 import webapp.persistence.PersistenceException;
 
@@ -47,9 +49,11 @@ public class DBSetupUtils {
     public static final int NUM_INIT_CUSTOMERS;
     public static final int NUM_INIT_SALES;
     public static final int NUM_INIT_ADDRESSES;
+    public static final int NUM_INIT_DELIVERIES;
 
     public static final Operation INSERT_CUSTOMER_SALE_DATA;
     public static final Operation INSERT_CUSTOMER_ADDRESS_DATA;
+    public static final Operation INSERT_CUSTOMER_DELIVERY_DATA;
     public static final Operation INSERT_CUSTOMER_ALL_DATA;
 	
 	static {
@@ -77,18 +81,29 @@ public class DBSetupUtils {
 		
 		Insert insertAddresses = 
 				insertInto("ADDRESS")
-                .withGeneratedValue("ID", ValueGenerators.sequence().startingAt(100L).incrementingBy(1))
-                .columns(                             "ADDRESS", "CUSTOMER_VAT")
-                .values(           "FCUL, Campo Grande, Lisboa",      197672337)
-                .values(          "R. 25 de Abril, 101A, Porto",      197672337)
-                .values( "Av Neil Armstrong, Cratera Azul, Lua",      168027852)
+				//.withGeneratedValue("ID", ValueGenerators.sequence().startingAt(100L).incrementingBy(1))
+				.columns("ID",                             "ADDRESS", "CUSTOMER_VAT")
+                .values( 1,           "FCUL, Campo Grande, Lisboa",      197672337)
+                .values( 2,          "R. 25 de Abril, 101A, Porto",      197672337)
+                .values( 3, "Av Neil Armstrong, Cratera Azul, Lua",      168027852)
                 .build();
 		
 		NUM_INIT_ADDRESSES = insertAddresses.getRowCount();		
 		
 		INSERT_CUSTOMER_ADDRESS_DATA = sequenceOf(insertCustomers, insertAddresses);
 		
-		INSERT_CUSTOMER_ALL_DATA = sequenceOf(insertCustomers, insertAddresses, insertSales);
+		Insert insertDeliveries =
+				insertInto("SALEDELIVERY")
+				.columns("ID",                            "SALE_ID", "CUSTOMER_VAT", "ADDRESS_ID")
+				.values(1, 1, 197672337, 1)
+				.build();
+		
+		NUM_INIT_DELIVERIES = insertDeliveries.getRowCount();
+		
+		INSERT_CUSTOMER_DELIVERY_DATA = sequenceOf(insertCustomers, insertDeliveries);
+		
+		
+		INSERT_CUSTOMER_ALL_DATA = sequenceOf(insertCustomers, insertAddresses, insertSales, insertDeliveries);
 	}
 	
 }

@@ -1,15 +1,18 @@
 package webapp;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static webapp.utils.DBSetupUtils.DB_PASSWORD;
 import static webapp.utils.DBSetupUtils.DB_URL;
 import static webapp.utils.DBSetupUtils.DB_USERNAME;
 import static webapp.utils.DBSetupUtils.DELETE_ALL;
 import static webapp.utils.DBSetupUtils.INSERT_CUSTOMER_ALL_DATA;
+import static webapp.utils.DBSetupUtils.NUM_INIT_CUSTOMERS;
+import static webapp.utils.DBSetupUtils.NUM_INIT_DELIVERIES;
+import static webapp.utils.DBSetupUtils.NUM_INIT_SALES;
 import static webapp.utils.DBSetupUtils.startApplicationDatabaseForTesting;
 
 import java.sql.SQLException;
@@ -23,7 +26,6 @@ import com.ninja_squad.dbsetup.operation.Operation;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import webapp.services.AddressesDTO;
@@ -84,10 +86,10 @@ public class PopulatedDatabaseTest {
 	 * @throws ApplicationException
 	 */
 	
-	@Disabled
+	//@Disabled
 	@Test
 	public void addNewClientWithAnExistingVATTest() throws ApplicationException {
-		assertTrue(hasClient(197672337));
+		assumeTrue(hasClient(197672337));
 		assertThrows(ApplicationException.class, () -> {
 			CustomerService.INSTANCE.addCustomer(197672337, "FCUL", 217500000);
 		});
@@ -103,10 +105,11 @@ public class PopulatedDatabaseTest {
 	 * @throws ApplicationException
 	 */
 	
-	@Disabled
+	//@Disabled
 	@Test
 	public void updateClientContactTest() throws ApplicationException {
-		assertTrue(hasClient(197672337));
+		assumeTrue(hasClient(197672337));
+		assumeFalse(CustomerService.INSTANCE.getCustomerByVat(197672337).phoneNumber == 999999999);
 		CustomerService.INSTANCE.updateCustomerPhone(197672337, 999999999);
 		
 		CustomerDTO customerDTO = CustomerService.INSTANCE.getCustomerByVat(197672337);
@@ -123,12 +126,12 @@ public class PopulatedDatabaseTest {
 	 * @throws ApplicationException
 	 */
 	
-	@Disabled
+	//@Disabled
 	@Test
 	public void deleteAllClientsTest() throws ApplicationException {
-		CustomersDTO customersDTO = CustomerService.INSTANCE.getAllCustomers();
-		assumeTrue(customersDTO.customers.size() != 0);
+		assumeTrue(NUM_INIT_CUSTOMERS != 0);
 		
+		CustomersDTO customersDTO = CustomerService.INSTANCE.getAllCustomers();
 		for(CustomerDTO customer : customersDTO.customers)
 			CustomerService.INSTANCE.removeCustomer(customer.vat);
 		
@@ -145,35 +148,53 @@ public class PopulatedDatabaseTest {
 	 * @throws ApplicationException
 	 */
 	
-	@Disabled
+	//@Disabled
 	@Test
 	public void addNewSaleTest() throws ApplicationException {
-		SalesDTO salesDTO = SaleService.INSTANCE.getAllSales();
-		int salesSize = salesDTO.sales.size();
-		
 		assertTrue(hasClient(197672337));
 		SaleService.INSTANCE.addSale(197672337);
 		
-		assertEquals(salesSize + 1, SaleService.INSTANCE.getAllSales().sales.size());
+		int salesSize = SaleService.INSTANCE.getAllSales().sales.size();
+		assertEquals(NUM_INIT_SALES + 1, salesSize);
 	}
 	
+	/**
+	 * 3.g)
+	 * 
+	 * Testing:
+	 * 
+	 * Retrieve all sales when getAllSales method is called.
+	 * 
+	 * @throws ApplicationException
+	 */
+	
+	//@Disabled
 	@Test
-	public void addNewSaleWithInvalidVATTest() throws ApplicationException {
+	public void retrieveAllSalesTest() throws ApplicationException {
 		SalesDTO salesDTO = SaleService.INSTANCE.getAllSales();
 		int salesSize = salesDTO.sales.size();
 		
-		SaleService.INSTANCE.addSale(1);
-		
-		assertFalse(salesSize + 1 == SaleService.INSTANCE.getAllSales().sales.size()); 
+		assertEquals(NUM_INIT_SALES, salesSize); 
 	}
 	
-	@Disabled
+	/**
+	 * 3.f)
+	 * 
+	 * Testing:
+	 * 
+	 * After the update of a sale status, that information should be properly saved.
+	 * 
+	 * @throws ApplicationException
+	 */
+	
+	//@Disabled
 	@Test
 	public void updateSaleTest() throws ApplicationException {
-		SalesDTO salesDTO = SaleService.INSTANCE.getAllSales();
-		assumeTrue(salesDTO.sales.size() != 0);
+		assumeTrue(NUM_INIT_SALES != 0);
 		
+		SalesDTO salesDTO = SaleService.INSTANCE.getAllSales();
 		SaleDTO saleDTO = salesDTO.sales.get(0);
+		
 		SaleService.INSTANCE.updateSale(saleDTO.id);
 		
 		salesDTO = SaleService.INSTANCE.getAllSales();
@@ -182,18 +203,47 @@ public class PopulatedDatabaseTest {
 		assertEquals("C", saleDTO.statusId);
 	}
 	
-	@Disabled
+	/**
+	 * 3.g)
+	 * 
+	 * Testing:
+	 * 
+	 * Retrieve all sales deliveries by customer when getSalesDeliveryByVat method is called.
+	 * 
+	 * @throws ApplicationException
+	 */
+	
+	//@Disabled
+	@Test
+	public void retrieveAllSalesDeliveriesByCustomerTest() throws ApplicationException {
+		assumeTrue(hasClient(197672337));
+		SalesDeliveryDTO salesDeliveryDTO = SaleService.INSTANCE.getSalesDeliveryByVat(197672337);
+		
+		assertEquals(NUM_INIT_DELIVERIES, salesDeliveryDTO.sales_delivery.size());
+	}
+	
+	/**
+	 * 3.h)
+	 * 
+	 * Testing:
+	 * 
+	 * Adding a new sale delivery increases the total number of all sales deliveries by one.
+	 * 
+	 * @throws ApplicationException
+	 */
+	
+	//@Disabled
 	@Test
 	public void addNewSaleDeliveryTest() throws ApplicationException {
-		assertTrue(hasClient(197672337));
+		assumeTrue(hasClient(197672337));
 		SalesDTO salesDTO = SaleService.INSTANCE.getSaleByCustomerVat(197672337);
 		assumeTrue(salesDTO.sales.size() != 0);
-		SalesDeliveryDTO salesDeliveryDTO = SaleService.INSTANCE.getSalesDeliveryByVat(197672337);
-		assumeTrue(salesDeliveryDTO.sales_delivery.size() == 0);
+		
 		
 		AddressesDTO addressesDTO = CustomerService.INSTANCE.getAllAddresses(197672337);
 		SaleService.INSTANCE.addSaleDelivery(salesDTO.sales.get(0).id, addressesDTO.addrs.get(0).id);
 		
-		assertEquals(1, SaleService.INSTANCE.getSalesDeliveryByVat(197672337).sales_delivery.size());
+		int deliveriesSize = SaleService.INSTANCE.getSalesDeliveryByVat(197672337).sales_delivery.size();
+		assertEquals(NUM_INIT_DELIVERIES + 1, deliveriesSize);
 	}
 }
