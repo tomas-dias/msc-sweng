@@ -1,4 +1,4 @@
-# **PPC Assignment 3 Directions**
+# **PPC Assignment 3 Guidelines**
 
 ## **Floyd-Warshall algorithm**
 

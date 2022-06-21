@@ -1,4 +1,4 @@
-# **PPC Assignment 2 Directions**
+# **PPC Assignment 2 Guidelines**
 
 ## **Objective**
 
