@@ -1,3 +1,6 @@
-[submodule "finalproject"]
+[submodule "cm-finalproject"]
 	path = cm/finalproject
 	url = https://github.com/mdmourao/Shotop
+[submodule "aw-finalproject"]
+	path = aw/finalproject
+	url = https://github.com/tomas-dias/aw-project
