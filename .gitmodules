@@ -4,3 +4,6 @@
 [submodule "aw-finalproject"]
 	path = aw/finalproject
 	url = https://github.com/tomas-dias/aw-project
+[submodule "idc-finalproject"]
+	path = idc/finalproject
+	url = https://github.com/tomas-dias/idc-project
