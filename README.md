@@ -1,6 +1,6 @@
 # **MSc in Software Engineering**
 
-This repository contains all projects and assignments done during [Master's Degree course in Informatics Engineering, with specialisation in Software Engineering, at Faculty of Sciences of the University of Lisbon](https://bit.ly/3OxIaB2).
+This repository contains all projects and assignments done during [Master's Degree course in Informatics Engineering, with specialisation in Software Engineering, at Faculty of Sciences of the University of Lisbon](https://bit.ly/3OxIaB2) (2021-present).
 
 ## **Content**
 
