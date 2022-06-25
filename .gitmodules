@@ -7,3 +7,6 @@
 [submodule "idc-finalproject"]
 	path = idc/finalproject
 	url = https://github.com/tomas-dias/idc-project
+[submodule "cn-finalproject"]
+	path = cn/finalproject
+	url = https://github.com/mdmourao/CloudProjectGroup7
